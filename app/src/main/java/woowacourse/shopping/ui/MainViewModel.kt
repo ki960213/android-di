@@ -3,9 +3,12 @@ package woowacourse.shopping.ui
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import woowacourse.shopping.data.CartRepository
-import woowacourse.shopping.data.ProductRepository
+import androidx.lifecycle.ViewModelProvider
+import woowacourse.shopping.data.CartRepositoryImpl
+import woowacourse.shopping.data.ProductRepositoryImpl
 import woowacourse.shopping.model.Product
+import woowacourse.shopping.repository.CartRepository
+import woowacourse.shopping.repository.ProductRepository
 
 class MainViewModel(
     private val productRepository: ProductRepository,
@@ -18,7 +21,6 @@ class MainViewModel(
     private val _onProductAdded: MutableLiveData<Boolean> = MutableLiveData(false)
     val onProductAdded: LiveData<Boolean> get() = _onProductAdded
 
-
     fun addCartProduct(product: Product) {
         cartRepository.addCartProduct(product)
         _onProductAdded.value = true
@@ -26,5 +28,17 @@ class MainViewModel(
 
     fun getAllProducts() {
         _products.value = productRepository.getAllProducts()
+    }
+
+    companion object {
+        @Suppress("UNCHECKED_CAST")
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+                    return MainViewModel(ProductRepositoryImpl(), CartRepositoryImpl()) as T
+                }
+                throw IllegalArgumentException("unknown viewModel class")
+            }
+        }
     }
 }
