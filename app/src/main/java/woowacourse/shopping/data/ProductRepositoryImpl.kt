@@ -1,9 +1,10 @@
 package woowacourse.shopping.data
 
+import com.ki960213.sheath.SingletonComponent
 import woowacourse.shopping.model.Product
 import woowacourse.shopping.repository.ProductRepository
 
-class ProductRepositoryImpl : ProductRepository {
+class ProductRepositoryImpl : ProductRepository, SingletonComponent {
 
     private val products: List<Product> = listOf(
         Product(
