@@ -80,12 +80,7 @@ internal class ClassSheathComponentTest {
     @Component
     class Test101
 
-    fun `ClassSheathComponent 객체를 생성하면 이름은 클래스의 qualifiedName과 같다`() {
-        val actual = ClassSheathComponent(Test101::class)
-
-        assertThat(actual.name).isEqualTo(Test101::class.qualifiedName)
-    }
-
+    @Test
     fun `ClassSheathComponent 객체를 생성할 때 지역 클래스라면 에러가 발생한다`() {
         @Component
         class Test
@@ -99,20 +94,22 @@ internal class ClassSheathComponentTest {
         }
     }
 
-    fun `ClassSheathComponent 객체를 생성할 때 클래스에 Prototype 애노테이션이 붙어 있다면 싱글톤이다`() {
+    @Test
+    fun `ClassSheathComponent 객체를 생성할 때 클래스에 Prototype 애노테이션이 붙어 있다면 싱글톤이 아니다`() {
         val actual = ClassSheathComponent(Test102::class)
 
-        assertThat(actual.isSingleton).isTrue()
+        assertThat(actual.isSingleton).isFalse()
     }
 
     @Prototype
     @Component
     class Test102
 
-    fun `ClassSheathComponent 객체를 생성할 때 클래스에 Prototype 애노테이션이 붙은 애노테이션이 붙어 있다면 싱글톤이다`() {
+    @Test
+    fun `ClassSheathComponent 객체를 생성할 때 클래스에 Prototype 애노테이션이 붙은 애노테이션이 붙어 있다면 싱글톤이 아니다`() {
         val actual = ClassSheathComponent(Test103::class)
 
-        assertThat(actual.isSingleton).isTrue()
+        assertThat(actual.isSingleton).isFalse()
     }
 
     @Prototype
@@ -122,10 +119,11 @@ internal class ClassSheathComponentTest {
     @Component
     class Test103
 
-    fun `ClassSheathComponent 객체를 생성할 때 클래스에 Prototype 애노테이션이 붙은 애노테이션과 Prototype 애노테이션이 붙어 있지 않다면 싱글톤이 아니다`() {
+    @Test
+    fun `ClassSheathComponent 객체를 생성할 때 클래스에 Prototype 애노테이션이 붙은 애노테이션이나 Prototype 애노테이션이 붙어 있지 않다면 싱글톤이다`() {
         val actual = ClassSheathComponent(Test104::class)
 
-        assertThat(actual.isSingleton).isFalse()
+        assertThat(actual.isSingleton).isTrue()
     }
 
     @Component

@@ -104,6 +104,7 @@ internal class FunctionSheathComponentTest {
     @Component
     class Test1006 : Test1004
 
+    @Test
     fun `FunctionSheathComponent 객체를 생성하면 타입은 함수의 리턴 타입과 같다`() {
         val actual = FunctionSheathComponent(Module101::test)
 
@@ -118,16 +119,11 @@ internal class FunctionSheathComponentTest {
 
     class Test105
 
-    fun `FunctionSheathComponent 객체를 생성하면 이름은 함수의 리턴 타입 클래스의 qualifiedName과 같다`() {
-        val actual = FunctionSheathComponent(Module101::test)
-
-        assertThat(actual.name).isEqualTo(Test105::class.qualifiedName)
-    }
-
-    fun `FunctionSheathComponent 객체를 생성할 때 함수에 Prototype 애노테이션이 붙어 있다면 싱글톤이다`() {
+    @Test
+    fun `FunctionSheathComponent 객체를 생성할 때 함수에 Prototype 애노테이션이 붙어 있다면 싱글톤이 아니다`() {
         val actual = FunctionSheathComponent(Module102::test)
 
-        assertThat(actual.isSingleton).isTrue()
+        assertThat(actual.isSingleton).isFalse()
     }
 
     @Module
@@ -137,10 +133,11 @@ internal class FunctionSheathComponentTest {
         fun test(): Unit = Unit
     }
 
-    fun `FunctionSheathComponent 객체를 생성할 때 함수에 Prototype 애노테이션이 붙은 애노테이션이 붙어 있다면 싱글톤이다`() {
+    @Test
+    fun `FunctionSheathComponent 객체를 생성할 때 함수에 Prototype 애노테이션이 붙은 애노테이션이 붙어 있다면 싱글톤이 아니다`() {
         val actual = FunctionSheathComponent(Module103::test)
 
-        assertThat(actual.isSingleton).isTrue()
+        assertThat(actual.isSingleton).isFalse()
     }
 
     @Module
@@ -153,10 +150,11 @@ internal class FunctionSheathComponentTest {
     @Prototype
     annotation class PrototypeAttached
 
-    fun `FunctionSheathComponent 객체를 생성할 때 함수에 Prototype 애노테이션이 붙은 애노테이션과 Prototype 애노테이션이 붙어 있지 않다면 싱글톤이 아니다`() {
+    @Test
+    fun `FunctionSheathComponent 객체를 생성할 때 함수에 Prototype 애노테이션이 붙은 애노테이션이나 Prototype 애노테이션이 붙어 있지 않다면 싱글톤이다`() {
         val actual = FunctionSheathComponent(Module104::test)
 
-        assertThat(actual.isSingleton).isFalse()
+        assertThat(actual.isSingleton).isTrue()
     }
 
     @Module
