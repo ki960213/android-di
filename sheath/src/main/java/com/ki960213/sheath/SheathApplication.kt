@@ -9,7 +9,7 @@ import kotlin.reflect.KType
 
 object SheathApplication {
 
-    lateinit var sheathComponentContainer: SheathComponentContainer
+    lateinit var sheathContainer: SheathContainer
 
     fun run(context: Context) {
         val scanner = ComponentScanner(context)
@@ -27,6 +27,6 @@ object SheathApplication {
                 acc
             }
 
-        sheathComponentContainer = SheathComponentContainer(container)
+        sheathContainer = SheathContainer(container)
     }
 }

@@ -21,7 +21,7 @@ inline fun <reified VM : ViewModel> Fragment.activityViewModels(
     val viewModelFactory = viewModelFactory {
         initializer {
             val viewModelComponent =
-                SheathApplication.sheathComponentContainer[VM::class.createType()]
+                SheathApplication.sheathContainer[VM::class.createType()]
             viewModelComponent.getNewInstance() as VM
         }
     }
@@ -55,7 +55,7 @@ inline fun <reified VM : ViewModel> Fragment.viewModels(
     val viewModelFactory = viewModelFactory {
         initializer {
             val viewModelComponent =
-                SheathApplication.sheathComponentContainer[VM::class.createType()]
+                SheathApplication.sheathContainer[VM::class.createType()]
             viewModelComponent.getNewInstance() as VM
         }
     }

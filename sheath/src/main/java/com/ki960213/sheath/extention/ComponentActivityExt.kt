@@ -19,7 +19,7 @@ inline fun <reified VM : ViewModel> ComponentActivity.viewModels(
     val viewModelFactory = viewModelFactory {
         initializer {
             val viewModelComponent =
-                SheathApplication.sheathComponentContainer[VM::class.createType()]
+                SheathApplication.sheathContainer[VM::class.createType()]
             viewModelComponent.getNewInstance() as VM
         }
     }
