@@ -7,24 +7,14 @@ import androidx.lifecycle.ViewModelLazy
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.ki960213.sheath.SheathApplication
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createType
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.activityViewModels(
     noinline extrasProducer: (() -> CreationExtras)? = null,
     noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null,
 ): Lazy<VM> {
-    val viewModelFactory = viewModelFactory {
-        initializer {
-            val viewModelComponent =
-                SheathApplication.sheathContainer[VM::class.createType()]
-            viewModelComponent.getNewInstance() as VM
-        }
-    }
+    val viewModelFactory = sheathViewModelFactory<VM>()
 
     return createViewModelLazy(
         VM::class,
@@ -52,13 +42,7 @@ inline fun <reified VM : ViewModel> Fragment.viewModels(
     noinline extrasProducer: (() -> CreationExtras)? = null,
     noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null,
 ): Lazy<VM> {
-    val viewModelFactory = viewModelFactory {
-        initializer {
-            val viewModelComponent =
-                SheathApplication.sheathContainer[VM::class.createType()]
-            viewModelComponent.getNewInstance() as VM
-        }
-    }
+    val viewModelFactory = sheathViewModelFactory<VM>()
 
     return ViewModelLazy(
         VM::class,
