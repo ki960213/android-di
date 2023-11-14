@@ -4,6 +4,7 @@ import com.ki960213.sheath.component.SheathComponent
 import com.ki960213.sheath.sorter.sorted
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import kotlin.reflect.full.isSupertypeOf
 
 class SheathContainer private constructor(private val components: Set<SheathComponent>) {
 
@@ -11,8 +12,10 @@ class SheathContainer private constructor(private val components: Set<SheathComp
         type: KType,
         qualifier: KClass<*>? = null,
     ): SheathComponent {
-        return components.find { it.type == type && it.qualifier == qualifier }
-            ?: throw IllegalArgumentException(if (qualifier == null) "" else "한정자가 ${qualifier.simpleName}인 " + "$type 타입의 컴포넌트가 등록되지 않았습니다.")
+        val dependingComponents =
+            components.filter { type.isSupertypeOf(it.type) && it.qualifier == qualifier }
+        require(dependingComponents.size == 1) { "종속 항목이 모호하거나 존재하지 않습니다." }
+        return dependingComponents.first()
     }
 
     companion object {
