@@ -13,16 +13,12 @@ import kotlin.reflect.KClass
 inline fun <reified VM : ViewModel> Fragment.activityViewModels(
     noinline extrasProducer: (() -> CreationExtras)? = null,
     noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null,
-): Lazy<VM> {
-    val viewModelFactory = sheathViewModelFactory<VM>()
-
-    return createViewModelLazy(
-        VM::class,
-        { requireActivity().viewModelStore },
-        { extrasProducer?.invoke() ?: requireActivity().defaultViewModelCreationExtras },
-        factoryProducer ?: { viewModelFactory },
-    )
-}
+): Lazy<VM> = createViewModelLazy(
+    VM::class,
+    { requireActivity().viewModelStore },
+    { extrasProducer?.invoke() ?: requireActivity().defaultViewModelCreationExtras },
+    factoryProducer ?: { sheathViewModelFactory<VM>() },
+)
 
 @MainThread
 fun <VM : ViewModel> Fragment.createViewModelLazy(
@@ -41,13 +37,9 @@ fun <VM : ViewModel> Fragment.createViewModelLazy(
 inline fun <reified VM : ViewModel> Fragment.viewModels(
     noinline extrasProducer: (() -> CreationExtras)? = null,
     noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null,
-): Lazy<VM> {
-    val viewModelFactory = sheathViewModelFactory<VM>()
-
-    return ViewModelLazy(
-        VM::class,
-        { viewModelStore },
-        factoryProducer ?: { viewModelFactory },
-        { extrasProducer?.invoke() ?: this.defaultViewModelCreationExtras },
-    )
-}
+): Lazy<VM> = ViewModelLazy(
+    VM::class,
+    { viewModelStore },
+    factoryProducer ?: { sheathViewModelFactory<VM>() },
+    { extrasProducer?.invoke() ?: this.defaultViewModelCreationExtras },
+)

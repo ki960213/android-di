@@ -15,16 +15,12 @@ import kotlin.reflect.full.createType
 inline fun <reified VM : ViewModel> ComponentActivity.viewModels(
     noinline extrasProducer: (() -> CreationExtras)? = null,
     noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null,
-): Lazy<VM> {
-    val viewModelFactory = sheathViewModelFactory<VM>()
-
-    return ViewModelLazy(
-        VM::class,
-        { viewModelStore },
-        factoryProducer ?: { viewModelFactory },
-        { extrasProducer?.invoke() ?: this.defaultViewModelCreationExtras },
-    )
-}
+): Lazy<VM> = ViewModelLazy(
+    VM::class,
+    { viewModelStore },
+    factoryProducer ?: { sheathViewModelFactory<VM>() },
+    { extrasProducer?.invoke() ?: this.defaultViewModelCreationExtras },
+)
 
 inline fun <reified VM : ViewModel> sheathViewModelFactory(): ViewModelProvider.Factory =
     viewModelFactory {
