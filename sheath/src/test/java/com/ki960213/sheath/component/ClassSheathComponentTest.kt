@@ -5,7 +5,6 @@ import com.ki960213.sheath.annotation.Component
 import com.ki960213.sheath.annotation.Inject
 import com.ki960213.sheath.annotation.NewInstance
 import com.ki960213.sheath.annotation.Prototype
-import com.ki960213.sheath.annotation.Qualifier
 import org.junit.Test
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -42,24 +41,6 @@ internal class ClassSheathComponentTest {
     class Test1002 @Inject constructor() {
         @Inject
         constructor(any: Any) : this()
-    }
-
-    @Test
-    fun `클래스의 의존 타입 중 같은 타입이 있다면 한정자가 있어도 에러가 발생한다`() {
-        try {
-            ClassSheathComponent(Test1003::class)
-        } catch (e: IllegalArgumentException) {
-            assertThat(e)
-                .hasMessageThat()
-                .isEqualTo("${Test1003::class.qualifiedName} 클래스는 같은 타입을 여러 곳에서 의존하고 있습니다.")
-        }
-    }
-
-    @Component
-    class Test1003(@Qualifier(Test1005::class) test1005: Test1004) {
-        @Inject
-        @Qualifier(Test1006::class)
-        private lateinit var test1006: Test1004
     }
 
     interface Test1004
@@ -129,37 +110,11 @@ internal class ClassSheathComponentTest {
     @Component
     class Test104
 
-    @Test
-    fun `인스턴스화 할 때 생성자의 매개 변수에 주입할 수 있는 SheathComponent가 부족하면 에러가 발생한다`() {
-        val sheathComponent1 = ClassSheathComponent(Test1::class)
-
-        try {
-            sheathComponent1.instantiate(emptyList())
-        } catch (e: IllegalArgumentException) {
-            assertThat(e)
-                .hasMessageThat()
-                .isEqualTo("${Test1::class.qualifiedName}의 종속 항목이 존재하지 않아 인스턴스화 할 수 없습니다.")
-        }
-    }
-
     @Component
     class Test1(test2: Test2)
 
     @Component
     class Test2
-
-    @Test
-    fun `인스턴스화 할 때 프로퍼티에 주입할 수 있는 SheathComponent가 부족하면 에러가 발생한다`() {
-        val sheathComponent = ClassSheathComponent(Test3::class)
-
-        try {
-            sheathComponent.instantiate(emptyList())
-        } catch (e: IllegalArgumentException) {
-            assertThat(e)
-                .hasMessageThat()
-                .isEqualTo("${Test3::class} 클래스의 ${Test3::class.getProperty("test2").name}에 할당할 수 있는 종속 항목이 존재하지 않습니다.")
-        }
-    }
 
     private fun KClass<*>.getProperty(name: String): KProperty1<*, *> =
         declaredMemberProperties.find { it.name == name }!!
@@ -171,41 +126,11 @@ internal class ClassSheathComponentTest {
         private lateinit var test2: Test2
     }
 
-    @Test
-    fun `인스턴스화 할 때 메서드에 주입할 수 있는 SheathComponent가 부족하면 에러가 발생한다`() {
-        val sheathComponent = ClassSheathComponent(Test4::class)
-
-        try {
-            sheathComponent.instantiate(emptyList())
-        } catch (e: IllegalArgumentException) {
-            assertThat(e)
-                .hasMessageThat()
-                .isEqualTo("${Test4::class.qualifiedName}의 종속 항목이 존재하지 않아 인스턴스화 할 수 없습니다.")
-        }
-    }
-
     @Component
     class Test4 {
         @Inject
         private fun test(test2: Test2): Unit = Unit
     }
-
-    @Test
-    fun `인스턴스화 할 때 한정자가 설정되어 있는 종속 항목이 주어지지 않았다면 에러가 발생한다`() {
-        val sheathComponent1 = ClassSheathComponent(Test23::class)
-        val sheathComponent2 = ClassSheathComponent(Test26::class)
-        sheathComponent2.instantiate(emptyList())
-        try {
-            sheathComponent1.instantiate(listOf(sheathComponent2))
-        } catch (e: IllegalArgumentException) {
-            assertThat(e)
-                .hasMessageThat()
-                .isEqualTo("${Test23::class.qualifiedName}의 종속 항목이 존재하지 않아 인스턴스화 할 수 없습니다.")
-        }
-    }
-
-    @Component
-    class Test23(@Qualifier(Test25::class) test24: Test24)
 
     interface Test24
 
@@ -219,9 +144,9 @@ internal class ClassSheathComponentTest {
     fun `인스턴스화 하면 인스턴스가 할당된다`() {
         val sheathComponent1 = ClassSheathComponent(Test1::class)
         val sheathComponent2 = ClassSheathComponent(Test2::class)
-        sheathComponent2.instantiate(emptyList())
+        sheathComponent2.initialize(emptyList())
 
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         assertThat(sheathComponent1.instance).isInstanceOf(Test1::class.java)
     }
@@ -230,8 +155,8 @@ internal class ClassSheathComponentTest {
     fun `새로운 인스턴스를 반환하면 이전 인스턴스와 다른 새 인스턴스가 반환된다`() {
         val sheathComponent1 = ClassSheathComponent(Test1::class)
         val sheathComponent2 = ClassSheathComponent(Test2::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = sheathComponent1.getNewInstance()
 
@@ -242,8 +167,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 생성자의 종속 항목이 싱글톤이면 같은 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test5::class)
         val sheathComponent2 = ClassSheathComponent(Test6::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test5).test6
 
@@ -260,8 +185,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 생성자의 종속 항목이 싱글톤이 아니면 새 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test7::class)
         val sheathComponent2 = ClassSheathComponent(Test8::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test7).test8
 
@@ -279,8 +204,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 프로퍼티의 종속 항목이 싱글톤이면 같은 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test9::class)
         val sheathComponent2 = ClassSheathComponent(Test10::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test9).test10
 
@@ -300,8 +225,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 프로퍼티의 종속 항목이 싱글톤이 아니면 새 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test11::class)
         val sheathComponent2 = ClassSheathComponent(Test12::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test11).test12
 
@@ -322,8 +247,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 메서드의 종속 항목이 싱글톤이면 같은 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test13::class)
         val sheathComponent2 = ClassSheathComponent(Test14::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test13).test14
 
@@ -347,8 +272,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 메서드의 종속 항목이 싱글톤이 아니면 새 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test15::class)
         val sheathComponent2 = ClassSheathComponent(Test16::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test15).test16
 
@@ -373,8 +298,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 생성자의 매개 변수에 @NewInstance가 붙어있다면 새 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test17::class)
         val sheathComponent2 = ClassSheathComponent(Test18::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test17).test18
 
@@ -391,8 +316,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 프로퍼티에 @NewInstance가 붙어있다면 새 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test19::class)
         val sheathComponent2 = ClassSheathComponent(Test20::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test19).test20
 
@@ -413,8 +338,8 @@ internal class ClassSheathComponentTest {
     fun `새 인스턴스 반환 시 메서드의 매개 변수에 @NewInstance가 붙어있다면 새 종속 항목을 주입받는다`() {
         val sheathComponent1 = ClassSheathComponent(Test21::class)
         val sheathComponent2 = ClassSheathComponent(Test22::class)
-        sheathComponent2.instantiate(emptyList())
-        sheathComponent1.instantiate(listOf(sheathComponent2))
+        sheathComponent2.initialize(emptyList())
+        sheathComponent1.initialize(listOf(sheathComponent2))
 
         val actual = (sheathComponent1.getNewInstance() as Test21).test22
 

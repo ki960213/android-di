@@ -1,13 +1,13 @@
 package com.ki960213.sheath.sorter
 
 import com.ki960213.sheath.component.SheathComponent
-import kotlin.properties.Delegates
+import kotlin.properties.Delegates.observable
 
 internal class Node(val sheathComponent: SheathComponent) {
 
-    val dependentCount: Int = sheathComponent.dependentCount
+    val dependencyCount: Int = sheathComponent.dependencyCount
 
-    var inDegreeCount: Int by Delegates.observable(dependentCount) { _, _, newValue ->
+    var inDegreeCount: Int by observable(dependencyCount) { _, _, newValue ->
         check(newValue >= 0) { "노드의 진입 차수가 0 미만일 수 없습니다." }
     }
         private set

@@ -9,7 +9,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ki960213.sheath.SheathApplication
-import kotlin.reflect.full.createType
+import kotlin.reflect.typeOf
 
 @MainThread
 inline fun <reified VM : ViewModel> ComponentActivity.viewModels(
@@ -25,8 +25,7 @@ inline fun <reified VM : ViewModel> ComponentActivity.viewModels(
 inline fun <reified VM : ViewModel> sheathViewModelFactory(): ViewModelProvider.Factory =
     viewModelFactory {
         initializer {
-            val viewModelComponent =
-                SheathApplication.sheathContainer[VM::class.createType()]
+            val viewModelComponent = SheathApplication.sheathContainer[typeOf<VM>()]
             viewModelComponent.getNewInstance() as VM
         }
     }

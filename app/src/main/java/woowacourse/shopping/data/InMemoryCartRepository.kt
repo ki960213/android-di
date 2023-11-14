@@ -1,11 +1,16 @@
 package woowacourse.shopping.data
 
+import com.ki960213.sheath.annotation.Qualifier
 import com.ki960213.sheath.annotation.Repository
 import woowacourse.shopping.model.CartProduct
 import woowacourse.shopping.model.Product
 import woowacourse.shopping.repository.CartRepository
 import java.time.LocalDateTime
 
+@Qualifier
+annotation class InMemory
+
+@InMemory
 @Repository
 class InMemoryCartRepository : CartRepository {
     private val cartProducts: MutableList<CartProduct> = mutableListOf()

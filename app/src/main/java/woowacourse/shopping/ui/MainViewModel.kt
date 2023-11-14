@@ -6,17 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ki960213.sheath.annotation.Inject
 import com.ki960213.sheath.annotation.NewInstance
-import com.ki960213.sheath.annotation.Qualifier
 import com.ki960213.sheath.annotation.SheathViewModel
 import kotlinx.coroutines.launch
-import woowacourse.shopping.data.InMemoryCartRepository
+import woowacourse.shopping.data.InMemory
 import woowacourse.shopping.model.Product
 import woowacourse.shopping.repository.CartRepository
 import woowacourse.shopping.repository.ProductRepository
 
 @SheathViewModel
 class MainViewModel(
-    @Qualifier(InMemoryCartRepository::class)
+    @InMemory
     private val cartRepository: CartRepository,
 ) : ViewModel() {
 

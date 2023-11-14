@@ -1,42 +1,55 @@
 package com.ki960213.sheath.component
 
 import kotlin.reflect.KType
-import kotlin.reflect.full.isSupertypeOf
-import kotlin.reflect.jvm.jvmErasure
 
 abstract class SheathComponent {
     abstract val type: KType
 
-    abstract val name: String
+    abstract val qualifier: Annotation?
 
     abstract val isSingleton: Boolean
 
-    protected abstract val dependentConditions: Map<KType, DependentCondition>
+    protected abstract val dependencies: Set<Dependency>
 
-    val dependentCount: Int
-        get() = dependentConditions.size
+    val dependencyCount: Int
+        get() = dependencies.size
+
+    private val dependingComponents = DependingComponents()
 
     lateinit var instance: Any
         protected set
 
-    fun isDependingOn(component: SheathComponent): Boolean {
-        val type = dependentConditions.keys
-            .find { it.isSupertypeOf(component.type) }
-            ?: return false
+    fun isDependingOn(component: SheathComponent): Boolean = dependencies.any { it on component }
 
-        val qualifier = dependentConditions[type]!!.qualifier ?: return true
-
-        return qualifier == component.type.jvmErasure
+    fun initialize(components: List<SheathComponent>) {
+        initDependingComponents(components)
+        instance = getNewInstance()
     }
 
-    abstract fun instantiate(components: List<SheathComponent>)
+    private fun initDependingComponents(components: List<SheathComponent>) {
+        val dependingComponents = dependencies.associateWith {
+            components.find { component -> it on component }
+                ?: throw IllegalArgumentException("해당 Sheath 컴포넌트를 초기화 하기에 제공받은 Sheath 컴포넌트가 부족합니다. 정렬 로직을 다시 살펴보세요.")
+        }
+        this.dependingComponents.putAll(dependingComponents)
+    }
 
     abstract fun getNewInstance(): Any
 
-    override fun equals(other: Any?): Boolean =
-        if (other is SheathComponent) type == other.type else false
+    protected fun getInstanceOf(dependency: Dependency): Any {
+        val component = dependingComponents[dependency]
 
-    override fun hashCode(): Int = type.hashCode()
+        return if (dependency.isNewInstance || !component.isSingleton) {
+            component.getNewInstance()
+        } else {
+            component.instance
+        }
+    }
+
+    override fun equals(other: Any?): Boolean =
+        if (other is SheathComponent) type == other.type && qualifier == other.qualifier else false
+
+    override fun hashCode(): Int = type.hashCode() * 31 + qualifier.hashCode()
 
     override fun toString(): String = "SheathComponent(type=$type)"
 }

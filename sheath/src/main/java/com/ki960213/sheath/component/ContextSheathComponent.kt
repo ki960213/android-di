@@ -9,15 +9,11 @@ internal class ContextSheathComponent(
 ) : SheathComponent() {
     override val type: KType = Context::class.createType()
 
-    override val name: String = Context::class.qualifiedName!!
+    override val qualifier: Annotation? = null
 
     override val isSingleton: Boolean = true
 
-    override val dependentConditions: Map<KType, DependentCondition> = emptyMap()
-
-    override fun instantiate(components: List<SheathComponent>) {
-        instance = context
-    }
+    override val dependencies: Set<Dependency> = emptySet()
 
     override fun getNewInstance(): Any = context
 }

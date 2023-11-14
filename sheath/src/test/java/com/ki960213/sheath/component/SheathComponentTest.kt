@@ -4,7 +4,6 @@ import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import com.ki960213.sheath.annotation.Component
 import com.ki960213.sheath.annotation.Inject
-import com.ki960213.sheath.annotation.Qualifier
 import org.junit.Rule
 import org.junit.Test
 import kotlin.reflect.full.createType
@@ -36,15 +35,6 @@ internal class SheathComponentTest {
 
     @Component
     class Test2 : Test1()
-
-    @Test
-    fun `SheathComponent의 해시 코드는 SheathComponent의 타입의 해시 코드와 같다`() {
-        val sheathComponent = ClassSheathComponent(Test1::class)
-
-        val actual = sheathComponent.hashCode()
-
-        assertThat(actual).isEqualTo(Test1::class.createType().hashCode())
-    }
 
     @Test
     fun `SheathComponent의 문자열은 타입을 담은 문자열이다`() {
@@ -124,22 +114,6 @@ internal class SheathComponentTest {
     @Component
     class Test12 : Test11
 
-    @Test
-    fun `SheathComponent의 종속 항목 중 다른 SheathComponent의 타입의 슈퍼 타입의 종속 항목이 있어도 한정자에 설정된 클래스가 다른 SheathComponent의 타입의 클래스와 다르다면 의존하지 않는 것이다`() {
-        val sheathComponent1 = ClassSheathComponent(Test13::class)
-        val sheathComponent2 = ClassSheathComponent(Test16::class)
-
-        val actual = sheathComponent1.isDependingOn(sheathComponent2)
-
-        assertThat(actual).isFalse()
-    }
-
-    @Component
-    class Test13(
-        @Qualifier(Test15::class)
-        test14: Test14,
-    )
-
     interface Test14
 
     @Component
@@ -147,14 +121,4 @@ internal class SheathComponentTest {
 
     @Component
     class Test16 : Test14
-
-    @Test
-    fun `SheathComponent의 종속 항목 중 다른 SheathComponent의 타입의 슈퍼 타입의 종속 항목이 있을 때 한정자에 설정된 클래스가 다른 SheathComponent의 타입의 클래스와 같다면 의존하는 것이다`() {
-        val sheathComponent1 = ClassSheathComponent(Test13::class)
-        val sheathComponent2 = ClassSheathComponent(Test15::class)
-
-        val actual = sheathComponent1.isDependingOn(sheathComponent2)
-
-        assertThat(actual).isTrue()
-    }
 }

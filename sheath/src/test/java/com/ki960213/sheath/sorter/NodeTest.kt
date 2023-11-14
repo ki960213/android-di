@@ -11,7 +11,7 @@ internal class NodeTest {
     fun `노드의 의존 개수는 SheathComponent의 의존 개수와 같다`() {
         val node1 = Node(ClassSheathComponent(Test1::class))
 
-        val actual = node1.dependentCount
+        val actual = node1.dependencyCount
 
         assertThat(actual).isEqualTo(1)
     }

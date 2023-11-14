@@ -6,10 +6,11 @@ import com.ki960213.sheath.annotation.Module
 import com.ki960213.sheath.component.ClassSheathComponent
 import com.ki960213.sheath.component.FunctionSheathComponent
 import com.ki960213.sheath.component.SheathComponent
+import com.ki960213.sheath.extention.hasAnnotationOrHasAttachedAnnotation
 import dalvik.system.DexFile
 import dalvik.system.PathClassLoader
 import kotlin.reflect.KClass
-import kotlin.reflect.full.functions
+import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.hasAnnotation
 
 internal class ComponentScanner(private val context: Context) {
@@ -46,7 +47,11 @@ internal class ComponentScanner(private val context: Context) {
         this.annotations.any { annotation -> annotation.annotationClass == Module::class }
 
     private fun extractSheathComponent(clazz: KClass<*>): List<SheathComponent> =
-        clazz.functions.mapNotNull { function ->
-            if (function.hasAnnotation<Component>()) FunctionSheathComponent(function) else null
+        clazz.declaredMemberFunctions.mapNotNull { function ->
+            if (function.hasAnnotationOrHasAttachedAnnotation<Component>()) {
+                FunctionSheathComponent(function)
+            } else {
+                null
+            }
         }
 }
