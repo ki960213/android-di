@@ -4,6 +4,7 @@ import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import com.ki960213.sheath.annotation.Component
 import com.ki960213.sheath.component.ClassSheathComponent
+import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
 
@@ -33,33 +34,17 @@ internal class GraphTest {
     @Component
     private class Test2
 
-    @Test
-    fun `그래프를 만들 때 어떤 노드의 중복 종속 항목이 존재한다면 에러가 발생한다`() {
-        val nodes = setOf(
-            Node(ClassSheathComponent(Test3::class)),
-            Node(ClassSheathComponent(Test5::class)),
-            Node(ClassSheathComponent(Test6::class)),
-        )
-
-        try {
-            Graph(nodes)
-        } catch (e: IllegalArgumentException) {
-            assertThat(e).hasMessageThat()
-                .isEqualTo("${ClassSheathComponent(Test3::class)} 컴포넌트에 모호한 종속 항목이 존재합니다.")
-        }
-    }
+    @Component
+    class Test3(test5: Test5, test6: Test6)
 
     @Component
-    private class Test3(test5: Test5, test6: Test6)
+    open class Test4
 
     @Component
-    private open class Test4
+    class Test5 : Test4()
 
     @Component
-    private class Test5 : Test4()
-
-    @Component
-    private class Test6 : Test4()
+    class Test6 : Test4()
 
     @Test
     fun `그래프를 노드를 이용해 생성하면 각 노드를 의존하는 노드들을 저장한다`() {
@@ -83,6 +68,7 @@ internal class GraphTest {
 
         try {
             graph.getNodesThatDependOn(node3)
+            fail("테스트 실패함")
         } catch (e: IllegalArgumentException) {
             assertThat(e).hasMessageThat().isEqualTo("$node3 노드는 그래프에 없는 노드입니다.")
         }

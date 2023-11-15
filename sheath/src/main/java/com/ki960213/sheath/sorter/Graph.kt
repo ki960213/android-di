@@ -7,8 +7,13 @@ internal class Graph(private val nodes: Set<Node>) {
     }
 
     init {
-        require(nodes.all { node -> node.dependencyCount == node.dependencyCountInGraph }) {
-            "모호하거나 존재하지 않는 종속 항목이 존재합니다."
+        nodes.forEach { node ->
+            if (node.dependencyCount > node.dependencyCountInGraph) {
+                throw IllegalArgumentException("${node.sheathComponent} 컴포넌트의 종속 항목 중 등록되지 않은 컴포넌트가 있습니다.")
+            }
+            if (node.dependencyCount < node.dependencyCountInGraph) {
+                throw IllegalArgumentException("${node.sheathComponent} 컴포넌트의 종속 항목 중 모호한 종속 항목이 존재합니다.")
+            }
         }
     }
 

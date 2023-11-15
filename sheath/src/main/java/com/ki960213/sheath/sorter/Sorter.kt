@@ -18,7 +18,7 @@ internal fun Collection<SheathComponent>.sorted(): List<SheathComponent> {
         val dependNodes = graph.getNodesThatDependOn(node)
         dependNodes.forEach {
             it.minusInDegree()
-            queue.add(it)
+            if (it.inDegreeCount == 0) queue.add(it)
         }
     }
 

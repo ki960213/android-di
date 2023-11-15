@@ -29,7 +29,7 @@ abstract class SheathComponent {
     private fun initDependingComponents(components: List<SheathComponent>) {
         val dependingComponents = dependencies.associateWith {
             components.find { component -> it on component }
-                ?: throw IllegalArgumentException("해당 Sheath 컴포넌트를 초기화 하기에 제공받은 Sheath 컴포넌트가 부족합니다. 정렬 로직을 다시 살펴보세요.")
+                ?: throw IllegalArgumentException("$type 타입의 컴포넌트를 초기화 하기에 ${it.type} 타입의 Sheath 컴포넌트가 부족합니다.")
         }
         this.dependingComponents.putAll(dependingComponents)
     }
@@ -51,5 +51,5 @@ abstract class SheathComponent {
 
     override fun hashCode(): Int = type.hashCode() * 31 + qualifier.hashCode()
 
-    override fun toString(): String = "SheathComponent(type=$type)"
+    override fun toString(): String = "SheathComponent(type=$type" + (if (qualifier != null) ", qualifier=$qualifier" else "") + ")"
 }

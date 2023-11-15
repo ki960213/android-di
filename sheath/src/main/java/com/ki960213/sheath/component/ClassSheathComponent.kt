@@ -66,7 +66,7 @@ internal class ClassSheathComponent(
     private fun KClass<*>.getInjectConstructor(): KFunction<*> =
         constructors.find { it.hasAnnotation<Inject>() }
             ?: primaryConstructor
-            ?: throw IllegalArgumentException("생성자에 @Inject이 붙지 않고 주 생성자가 없는 클래스는 인스턴스화 할 수 없습니다.")
+            ?: throw IllegalArgumentException("$clazz 클래스는 생성자에 @Inject이 붙지 않고 주 생성자가 없어서 인스턴스화 할 수 없습니다.")
 
     private fun Any.executePropertyInjection() {
         val properties = clazz.findAnnotatedProperties<Inject>()
