@@ -37,6 +37,7 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("org.atteo.classindex:classindex:3.13")
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.google.truth:truth:1.1.3")
     // Reflection

@@ -69,4 +69,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.15.1")
     // Robolectric
     testImplementation("org.robolectric:robolectric:4.9")
+    // Sheath
+    compileOnly("org.atteo.classindex:classindex:3.13")
+    kapt("org.atteo.classindex:classindex:3.13")
 }

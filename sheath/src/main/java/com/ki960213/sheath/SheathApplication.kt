@@ -10,7 +10,7 @@ object SheathApplication {
     lateinit var sheathContainer: SheathContainer
 
     fun run(context: Context) {
-        val scanner = ComponentScanner(context)
+        val scanner = ComponentScanner()
         val components: List<SheathComponent> =
             scanner.findAll() + ContextSheathComponent(context)
 

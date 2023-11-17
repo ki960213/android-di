@@ -1,57 +1,55 @@
 package com.ki960213.sheath.scanner
 
-import android.content.Context
 import com.ki960213.sheath.annotation.Component
+import com.ki960213.sheath.annotation.DataSource
 import com.ki960213.sheath.annotation.Module
+import com.ki960213.sheath.annotation.Repository
+import com.ki960213.sheath.annotation.SheathViewModel
+import com.ki960213.sheath.annotation.UseCase
 import com.ki960213.sheath.component.ClassSheathComponent
 import com.ki960213.sheath.component.FunctionSheathComponent
 import com.ki960213.sheath.component.SheathComponent
 import com.ki960213.sheath.extention.hasAnnotationOrHasAttachedAnnotation
-import dalvik.system.DexFile
-import dalvik.system.PathClassLoader
+import org.atteo.classindex.ClassIndex
 import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberFunctions
-import kotlin.reflect.full.hasAnnotation
 
-internal class ComponentScanner(private val context: Context) {
+internal class ComponentScanner {
     fun findAll(): List<SheathComponent> {
         val components = mutableListOf<SheathComponent>()
-        val classLoader = context.classLoader as PathClassLoader
-        val dexFile = DexFile(context.packageCodePath)
-        val classNames = dexFile.entries()
-        while (classNames.hasMoreElements()) {
-            val className = classNames.nextElement()
-            components.addComponentIfMatchTarget(className, classLoader)
+        val annotatedClasses = INDEXED_ANNOTATIONS.flatMap {
+            ClassIndex.getAnnotated(it).map { clazz -> clazz.kotlin }
+        }
+        annotatedClasses.forEach {
+            if (it.isComponent()) components.add(ClassSheathComponent(it))
+            if (it.isModule()) components.addAll(it.extractSheathComponent())
         }
         return components
     }
 
-    private fun MutableList<SheathComponent>.addComponentIfMatchTarget(
-        className: String,
-        classLoader: PathClassLoader,
-    ) {
-        if (className.isInTargetPackage()) {
-            val clazz = classLoader.loadClass(className).kotlin
-            if (clazz.java.isComponent()) this.add(ClassSheathComponent(clazz))
-            if (clazz.java.isModule()) this.addAll(extractSheathComponent(clazz))
-        }
-    }
+    private fun KClass<*>.isComponent(): Boolean =
+        this.annotations.any { hasAnnotationOrHasAttachedAnnotation<Component>() }
 
-    private fun String.isInTargetPackage(): Boolean =
-        this.startsWith(context.packageName) && !this.contains("$")
+    private fun KClass<*>.isModule(): Boolean =
+        this.annotations.any { it.annotationClass == Module::class }
 
-    private fun Class<*>.isComponent(): Boolean =
-        this.annotations.any { it.annotationClass == Component::class || it.annotationClass.hasAnnotation<Component>() }
-
-    private fun Class<*>.isModule(): Boolean =
-        this.annotations.any { annotation -> annotation.annotationClass == Module::class }
-
-    private fun extractSheathComponent(clazz: KClass<*>): List<SheathComponent> =
-        clazz.declaredMemberFunctions.mapNotNull { function ->
+    private fun KClass<*>.extractSheathComponent(): List<SheathComponent> =
+        declaredMemberFunctions.mapNotNull { function ->
             if (function.hasAnnotationOrHasAttachedAnnotation<Component>()) {
                 FunctionSheathComponent(function)
             } else {
                 null
             }
         }
+
+    companion object {
+        private val INDEXED_ANNOTATIONS = listOf(
+            Component::class.java,
+            UseCase::class.java,
+            Repository::class.java,
+            DataSource::class.java,
+            Module::class.java,
+            SheathViewModel::class.java,
+        )
+    }
 }
